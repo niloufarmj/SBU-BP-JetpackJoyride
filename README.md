@@ -1,14 +1,17 @@
-# SBDL (Sadegh & Borjian Directmedia Layer)
+<h> A clone of jetpack joyride game in C++ using SBDL library . </h>
+
+
+## SBDL (Sadegh & Borjian Directmedia Layer)
 A wrapper around SDL2 which make use of SDL much simpler
 
-## Motivation
+### Motivation
 For years in Shahid Beheshti University, ITP final project was a game written using SDL library.
 Since the bare SDL library is too verbose and hard to use for first-year students in college, each year TAs create their own wrapper for SDL to ease the SDL for students.
 This library is successor of `Hash<Written for ITP96Fall>` and `Genio2<Written for ITP95Fall>` with great experience which we learned from those libraries.
 
 Mohammad Sadegh Dehghan & Amin Borjian wrote this library to fulfill all the needs of a first-term student for ITP97Fall course and all upcoming ITP courses in future.
 
-## Basic Usage
+### Basic Usage
 1. Put `include` directories of `SDL2`,`SDL2_image`,`SDL2_ttf`,`SDL2_mixer` in your compiler's include directory.
 2. Put `lib`  directories of `SDL2`,`SDL2_image`,`SDL2_ttf`,`SDL2_mixer` in your linker's path.
 3. Put `SDL2Main.lib`,`SDL2.lib`,`SDL2_image.lib`,`SDL2_mixer.lib`,`SDL2_ttf.lib` in linker's dependencies.
@@ -46,10 +49,4 @@ int main(int argc, char *argv[])
 }
 
 ```
-## Contribution
-If you find any bugs,need a new feature,etc feel free to create an issue[https://github.com/MSDehghan/SBDL/issues]
 
-Pull requests are also appreciated.
-
-## License
-This library is released under GPL v3
