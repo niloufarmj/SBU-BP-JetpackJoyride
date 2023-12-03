@@ -1,0 +1,7 @@
+﻿  stdafx.cpp
+  Jetpack.cpp
+d:\projects\jetpack\jetpack\jetpack.cpp(304): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+d:\projects\jetpack\jetpack\jetpack.cpp(363): warning C4305: 'argument': truncation from 'int' to 'Uint8'
+d:\projects\jetpack\jetpack\jetpack.cpp(363): warning C4309: 'argument': truncation of constant value
+  Jetpack.vcxproj -> D:\Projects\Jetpack\Debug\Jetpack.exe
+  Jetpack.vcxproj -> D:\Projects\Jetpack\Debug\Jetpack.pdb (Full PDB)
