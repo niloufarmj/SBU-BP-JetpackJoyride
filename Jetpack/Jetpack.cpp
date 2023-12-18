@@ -6,33 +6,72 @@
 
 using namespace std;
 
-enum state {
-	start, play, home, pause, gameOver, coinEvent, lazerEvent, missleEvent, speedtokenEvent, zapperEvent, gravitytokenEvent
-};
-enum barrySituation {
-	barryRun, barryWalk, barryFly, barryFall, gravityBarryFly, gravityBarryFall, gravityBarryWalkDown, gravityBarryWalkUp, gravityBarryRunDown, gravityBarryRunUp, baryGoFast
-};
-enum backgroundTypes {
-	firstBack, otherBack, wareBack
-};
-enum zapperShowing {
-	firstZap, secondZap, thirdZap, fourthZap
-};
-enum homeMenu {
-	poster1, poster2, poster3, changeBarry
-};
-enum missleShowing {
-	missleFar, missleNear, missleIn
-};
-enum laserShowing {
-	nonactive, active1, active2
+enum GameState {
+    STATE_START,
+    STATE_PLAY,
+    STATE_HOME,
+    STATE_PAUSE,
+    STATE_GAME_OVER,
+    STATE_COIN_EVENT,
+    STATE_LASER_EVENT,
+    STATE_MISSILE_EVENT,
+    STATE_SPEED_TOKEN_EVENT,
+    STATE_ZAPPER_EVENT,
+    STATE_GRAVITY_TOKEN_EVENT
 };
 
-struct core {
+enum BarrySituation {
+    BARRY_RUN,
+    BARRY_WALK,
+    BARRY_FLY,
+    BARRY_FALL,
+    BARRY_GRAVITY_FLY,
+    BARRY_GRAVITY_FALL,
+    BARRY_GRAVITY_WALK_DOWN,
+    BARRY_GRAVITY_WALK_UP,
+    BARRY_GRAVITY_RUN_DOWN,
+    BARRY_GRAVITY_RUN_UP,
+    BARRY_GO_FAST
+};
+
+enum BackgroundType {
+    BACKGROUND_FIRST,
+    BACKGROUND_OTHER,
+    BACKGROUND_WARE
+};
+
+enum ZapperState {
+    ZAPPER_FIRST,
+    ZAPPER_SECOND,
+    ZAPPER_THIRD,
+    ZAPPER_FOURTH
+};
+
+enum HomeMenuState {
+    HOME_POSTER1,
+    HOME_POSTER2,
+    HOME_POSTER3,
+    HOME_CHANGE_BARRY
+};
+
+enum MissileState {
+	MISSILE_FAR, 
+	MISSILE_NEAR, 
+	MISSILE_IN
+};
+
+enum LaserState {
+	LASER_NONACTIVE, 
+	LASER_ACTIVE1, 
+	LASER_ACTIVE2
+};
+
+struct Core {
 	int x;
 	int y;
 };
-struct zapper {
+
+struct Zapper {
 	Texture first;
 	Texture second;
 	Texture third;
@@ -40,25 +79,29 @@ struct zapper {
 	int x;
 	int y;
 };
-struct lazer {
+
+struct Laser {
 	Texture nonactive;
 	Texture active1;
 	Texture active2;
 	int existance;
 	int x;
 	int y;
-	SDL_Rect Rect;
+	SDL_Rect rect;
 };
-struct backGround {
+
+struct Background {
 	Texture pic;
 	int x;
 };
-struct missle {
+
+struct Missle {
 	Texture picArray[6];
 	int x;
 	int y;
 };
-struct speedToken {
+
+struct SpeedToken {
 	Texture pic1;
 	Texture pic2;
 	Texture pic3;
@@ -67,52 +110,62 @@ struct speedToken {
 	int y;
 };
 
-state chum;
-
-core barryLocation;
-core backLocation;
-core redWarLoc;
-core yellowWarLoc;
-core rand_redWarLoc_1;
-core rand_yellowWarLoc_1;
-core rand_redWarLoc_2;
-core rand_yellowWarLoc_2;
-core barryPoster;
-core menuClickCore;
-core menuLocation;
-core gToken;
-
-zapper myZapper;
-speedToken myToken;
-backgroundTypes how_is_back;
-zapperShowing how_is_zapper;
-homeMenu how_is_menu;
-missleShowing how_is_missle;
-lazer mylazer[6];
-missle myMissle;
-missle randomMissle1;
-missle randomMissle2;
-zapper horizentalZap;
-zapper verticalZap;
-zapper angledZap;
-zapper zappersArray[3];
-state eventsArray[6] = { missleEvent , gravitytokenEvent , missleEvent , speedtokenEvent , missleEvent ,lazerEvent };
-barrySituation how_is_barry;
-laserShowing how_is_laser;
-
-int zapper_y[3] = { 35 , 150 , 280 };
-int which_zapper_y;
-int which_zapper;
-int which_zapper_x;
-const int window_width = 800;
-const int window_height = 460;
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 460;
 const int FPS = 60; //frame per second
-const int delay = 1000 / FPS; //delay we need at each frame
-int barryVelocity_y;
-int shetab;
+const int DELAY = 1000 / FPS; //delay we need at each frame
+
+GameState currentGameState;
+
+Core playerLocation;
+Core backgroundLocation;
+Core redWarriorLocation;
+Core yellowWarriorLocation;
+Core randomRedWarriorLocation1;
+Core randomYellowWarriorLocation1;
+Core randomRedWarriorLocation2;
+Core randomYellowWarriorLocation2;
+Core barryPoster;
+Core menuClickCore;
+Core menuLocation;
+Core gravityTokenCore;
+
+Zapper obstacleZapper;
+SpeedToken obstacleToken;
+BackgroundType currentBackgroundType;
+ZapperState currentZapperState;
+HomeMenuState currentHomeMenuState;
+MissileState currentMissileState;
+LaserState currentLaserState;
+BarrySituation currentBarrySituation;
+
+Laser playerLaser[6];
+Missle playerMissle;
+Missle randomMissle1;
+Missle randomMissle2;
+Zapper horizentalZap;
+Zapper verticalZap;
+Zapper angledZap;
+Zapper zappersArray[3];
+GameState eventsArray[6] = { STATE_MISSILE_EVENT , STATE_GRAVITY_TOKEN_EVENT , 
+							STATE_MISSILE_EVENT , STATE_SPEED_TOKEN_EVENT , 
+							STATE_MISSILE_EVENT ,STATE_LASER_EVENT };
+
+
+int zapperY[3] = { 35 , 150 , 280 };
+int currentZapperX;
+int currentZapperY;
+int currentZapper;
+
+int barryVelocityY;
+
+
 int backVelocity = -7;
 int zapperVelocity = -7;
-int whichBack;
+
+int currentBackground;
+int acceleration;
+
 int walkingCounter;
 int zapperCounter;
 int menuCounter;
@@ -121,16 +174,19 @@ int gameoverCounter;
 int laserCounter;
 int tokenCounter;
 int GtokenConter;
-int barryPosterSize_x;
-int barryPosterSize_y;
 int accelerationCounter;
-int tempToken_y;
-int lazer_y[6] = { 30, 105 , 180 , 255 , 330 , 405 };
-int which_lazer_y;
-int elapsedTime, startTime;
-int randomEvents;
 int soundCounter;
 int notForgetCounter;
+
+int barryPosterSizeX;
+int barryPosterSizeY;
+
+int tempTokenY;
+int laserY[6] = { 30, 105 , 180 , 255 , 330 , 405 };
+int currentLaserY;
+int elapsedTime, startTime;
+int randomEvents;
+
 int score;
 
 bool finishFlag = false;
@@ -157,8 +213,8 @@ bool soundFlag;
 bool musicFlag;
 
 SDL_Rect pausePageHomeRect;
-SDL_Rect barryRect = { barryLocation.x, barryLocation.y, 25, 32 };
-SDL_Rect windowRect = { 0 , 0, window_width, window_height };
+SDL_Rect barryRect = { playerLocation.x, playerLocation.y, 25, 32 };
+SDL_Rect windowRect = { 0 , 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 SDL_Rect homeBarryRect = { barryPoster.x, barryPoster.y, 500, 260 };
 SDL_Rect pauseRect = { 750 , 20 , 20 , 30 };
 SDL_Rect resumeRect = { 70, 200, 200 , 70 };
@@ -188,19 +244,19 @@ SDL_Rect myTokenRect;
 SDL_Rect GTokenRect;
 SDL_Rect showPausedRect = { 200 , 0 , 400 , 50 };
 
-backGround backArray[12];
-backGround startPage;
-backGround labStart;
-backGround lab1;
-backGround lab2;
-backGround sectorStart;
-backGround sector1;
-backGround sector2;
-backGround volcanoStart;
-backGround volcano1;
-backGround volcano2;
-backGround warehouseStart;
-backGround warehouse;
+Background backArray[12];
+Background startPage;
+Background labStart;
+Background lab1;
+Background lab2;
+Background sectorStart;
+Background sector1;
+Background sector2;
+Background volcanoStart;
+Background volcano1;
+Background volcano2;
+Background warehouseStart;
+Background warehouse;
 
 Texture oldBarryRunPic;
 Texture oldBarryWalkPic;
@@ -265,45 +321,67 @@ Sound* jetSound;
 Music* gameMusic;
 Font* scoreFont;
 
-void what_to_do(state);
-void play_game();
-void initializer();
-void happenings();
+void executeState();
+void executeGameLogic();
+void initializeGameVariables();
+void triggerRandomEvent();
 void updateBarry();
-void drawBarry(barrySituation);
-void updateBackGround();
-void drawBackGround(backgroundTypes);
+void drawBarry();
+void updateBackground();
+void drawBackground();
 void updateZapper();
-void drawZapper(zapperShowing);
+void drawZapper();
 void initZapper();
 void updateMenu();
-void drawMenu(homeMenu);
-void inFlying();
+void drawMenu(HomeMenuState);
+void handleFlyingMovement();
 void updateMissle();
-void drawMissle(missleShowing);
-void mainDraw();
-void pausePageFun();
-void gameOverPageFun();
+void drawMissle(MissileState);
+void renderGameScreen();
+void displayPausePage();
+void handleGameOverPage();
 void updateGameOverPage();
 void drawGameOverPage();
 void updateLaser();
-void drawLaser(laserShowing);
+void drawLaser(LaserState);
 void updateSpeedToken();
 void drawSpeedToken();
 void updateGravityToken();
 void drawGravityToken();
-void gravityFlyFall();
-void zapperFun();
-void missleFun();
-void lazerFun();
-void gravityFun();
-void speedFun();
+void handleGravityFlyFall();
+void handleZapper();
+void handleMissile();
+void handleLaser();
+void handleGravityToken();
+void handleSpeedToken();
+void loadAssets();
 
 int main()
 {
 	srand(time(NULL));
-	SBDL::InitEngine("Jetpack_Joyride", window_width, window_height);
+	SBDL::InitEngine("Jetpack_Joyride", WINDOW_WIDTH, WINDOW_HEIGHT);
 
+	
+	loadAssets();
+	initializeGameVariables();
+	triggerRandomEvent();
+	SBDL::playMusic(gameMusic, -1);
+	while (SBDL::isRunning())
+	{
+		startTime = SBDL::getTime();
+		SBDL::clearRenderScreen();
+
+		executeState();
+
+		SBDL::updateRenderScreen();
+		elapsedTime = SBDL::getTime() - startTime;
+		if (elapsedTime < DELAY)
+			SBDL::delay(DELAY - elapsedTime);
+	}
+}
+
+void loadAssets() 
+{
 	labStart.pic = SBDL::loadTexture("assets/pic/back/Lab Start.png");
 	lab1.pic = SBDL::loadTexture("assets/pic/back/Lab1.png");
 	lab2.pic = SBDL::loadTexture("assets/pic/back/Lab2.png");
@@ -355,9 +433,9 @@ int main()
 	angledZap.fourth = SBDL::loadTexture("assets/pic/zappers/d4.png");
 	for (int i = 0; i < 6; i++)
 	{
-		mylazer[i].nonactive = SBDL::loadTexture("assets/pic/lazer/laser_noneactive.png");
-		mylazer[i].active1 = SBDL::loadTexture("assets/pic/lazer/laser_active1.png");
-		mylazer[i].active2 = SBDL::loadTexture("assets/pic/lazer/laser_active2.png");
+		playerLaser[i].nonactive = SBDL::loadTexture("assets/pic/lazer/laser_noneactive.png");
+		playerLaser[i].active1 = SBDL::loadTexture("assets/pic/lazer/laser_active1.png");
+		playerLaser[i].active2 = SBDL::loadTexture("assets/pic/lazer/laser_active2.png");
 	}
 	pausePic = SBDL::loadTexture("assets/Pause.png");
 	blackBack = SBDL::loadTexture("assets/blackBack.png", 900);
@@ -377,22 +455,22 @@ int main()
 	clickAnyWhere1 = SBDL::loadTexture("assets/pic/menu/clickanywhere.png");
 	clickAnyWhere2 = SBDL::loadTexture("assets/pic/menu/clickanywhere.png", 100);
 	clickAnyWhere3 = SBDL::loadTexture("assets/pic/menu/clickanywhere.png", 50);
-	myMissle.picArray[0] = SBDL::loadTexture("assets/pic/missle/missle (1).png");
-	myMissle.picArray[1] = SBDL::loadTexture("assets/pic/missle/missle (2).png");
-	myMissle.picArray[2] = SBDL::loadTexture("assets/pic/missle/missle (3).png");
-	myMissle.picArray[3] = SBDL::loadTexture("assets/pic/missle/missle (4).png");
-	myMissle.picArray[4] = SBDL::loadTexture("assets/pic/missle/missle (5).png");
-	myMissle.picArray[5] = SBDL::loadTexture("assets/pic/missle/missle (6).png");
+	playerMissle.picArray[0] = SBDL::loadTexture("assets/pic/missle/missle (1).png");
+	playerMissle.picArray[1] = SBDL::loadTexture("assets/pic/missle/missle (2).png");
+	playerMissle.picArray[2] = SBDL::loadTexture("assets/pic/missle/missle (3).png");
+	playerMissle.picArray[3] = SBDL::loadTexture("assets/pic/missle/missle (4).png");
+	playerMissle.picArray[4] = SBDL::loadTexture("assets/pic/missle/missle (5).png");
+	playerMissle.picArray[5] = SBDL::loadTexture("assets/pic/missle/missle (6).png");
 	redWarning = SBDL::loadTexture("assets/pic/missle/1m.png");
 	yellowWarning = SBDL::loadTexture("assets/pic/missle/2m.png");
 	oldText = SBDL::loadTexture("assets/pic/menu/old text.png");
 	youngText = SBDL::loadTexture("assets/pic/menu/young text.png");
 	chooseText = SBDL::loadTexture("assets/pic/menu/choose barry.png");
 	homePicClick = SBDL::loadTexture("assets/pic/menu/home.png.");
-	myToken.pic1 = SBDL::loadTexture("assets/pic/speedToken/speed token.png");
-	myToken.pic2 = SBDL::loadTexture("assets/pic/speedToken/speed token2.png");
-	myToken.pic3 = SBDL::loadTexture("assets/pic/speedToken/speed token3.png");
-	myToken.pic4 = SBDL::loadTexture("assets/pic/speedToken/speed token4.png");
+	obstacleToken.pic1 = SBDL::loadTexture("assets/pic/speedToken/speed token.png");
+	obstacleToken.pic2 = SBDL::loadTexture("assets/pic/speedToken/speed token2.png");
+	obstacleToken.pic3 = SBDL::loadTexture("assets/pic/speedToken/speed token3.png");
+	obstacleToken.pic4 = SBDL::loadTexture("assets/pic/speedToken/speed token4.png");
 	zapperSound = SBDL::loadSound("assets/sound/zapper.wav");
 	missleWarninSound = SBDL::loadSound("assets/sound/missile_warning.wav");
 	missleLounchSound = SBDL::loadSound("assets/sound/missile_launch.wav");
@@ -420,65 +498,60 @@ int main()
 	zappersArray[0] = angledZap;
 	zappersArray[1] = horizentalZap;
 	zappersArray[2] = verticalZap;
-
-	initializer();
-	happenings();
-	SBDL::playMusic(gameMusic, -1);
-	while (SBDL::isRunning())
-	{
-		startTime = SBDL::getTime();
-		SBDL::clearRenderScreen();
-
-		what_to_do(chum);
-
-		SBDL::updateRenderScreen();
-		elapsedTime = SBDL::getTime() - startTime;
-		if (elapsedTime < delay)
-			SBDL::delay(delay - elapsedTime);
-	}
 }
 
-void mainDraw()
+/*Renders the game screen by updating and drawing various
+game elements such as the background, player character, 
+zappers, animations, and the pause button.*/
+void renderGameScreen()
 {
 	SBDL::clearRenderScreen();
 	SBDL::updateEvents();
-	updateBackGround();
+	updateBackground();
 	updateBarry();
 	updateZapper();
-	drawBackGround(how_is_back);
+	drawBackground();
 
-	drawZapper(how_is_zapper);
-	zapperFun();
-	missleFun();
-	lazerFun();
-	gravityFun();
-	speedFun();
-	drawBarry(how_is_barry);
+	drawZapper();
+	handleZapper();
+	handleMissile();
+	handleLaser();
+	handleGravityToken();
+	handleSpeedToken();
+	drawBarry();
 	SBDL::showTexture(pausePic, pauseRect);
 	SBDL::updateRenderScreen();
 }
 
-void what_to_do(state chum)
+/*Executes the logic for the current game state, which 
+includes actions such as updating the menu, drawing the menu, 
+handling pause functionality, or displaying the game over screen.*/
+void executeState()
 {
-	switch (chum)
+	switch (currentGameState)
 	{
-	case play:
-		play_game();
+	case STATE_PLAY:
+		executeGameLogic();
 		break;
-	case home:
+	case STATE_HOME:
 		updateMenu();
-		drawMenu(how_is_menu);
+		drawMenu(currentHomeMenuState);
 		break;
-	case pause:
-		pausePageFun();
+	case STATE_PAUSE:
+		displayPausePage();
 		break;
-	case gameOver:
-		gameOverPageFun();
+	case STATE_GAME_OVER:
+		handleGameOverPage();
 		break;
 	}
 }
 
-void initializer()
+/*Initializes various game variables and flags to their default values
+ at the start of the game. Sets the initial values for flags related 
+ to gameplay states, sound settings, and character selection. 
+ Resets the current game state, counters, score, player location, 
+ velocity, and other relevant variables to their initial states.*/
+void initializeGameVariables()
 {
 	finishFlag = false;
 	gameStart = false;
@@ -496,16 +569,16 @@ void initializer()
 	soundFlag = true;
 	musicFlag = true;
 
-	chum = home;
+	currentGameState = STATE_HOME;
 
 	walkingCounter = 0;
 	zapperCounter = 0;
 
 	score = 0;
 
-	barryLocation.x = 0;
-	barryLocation.y = 380;
-	barryVelocity_y = 1;
+	playerLocation.x = 0;
+	playerLocation.y = 380;
+	barryVelocityY = 1;
 
 	for (int i = 0; i < 11; i++)
 	{
@@ -515,70 +588,78 @@ void initializer()
 			backArray[i].x = 800 + 2048 * (i - 1);
 	}
 
-	shetab = 1;
+	acceleration = 1;
 
 	barryPoster.x = 100;
 	barryPoster.y = 50;
-	barryPosterSize_x = 600;
-	barryPosterSize_y = 300;
+	barryPosterSizeX = 600;
+	barryPosterSizeY = 300;
 	menuClickCore.x = 750;
 	menuClickCore.y = 0;
 	menuCounter = 0;
 	menuLocation.x = 240;
 	menuLocation.y = 0;
 
-	myZapper.x = -200;
-	myMissle.x = -200;
-	myToken.x = -200;
-	gToken.x = -200;
+	obstacleZapper.x = -200;
+	playerMissle.x = -200;
+	obstacleToken.x = -200;
+	gravityTokenCore.x = -200;
 
-	barryRect = { barryLocation.x, barryLocation.y, 50, 70 };
+	barryRect = { playerLocation.x, playerLocation.y, 50, 70 };
 }
 
-void happenings()
+/*Triggers a random event in the game. Generates a random number 
+to select an event from the eventsArray. Depending on the selected 
+event, sets the corresponding flags and initializes any 
+relevant variables. Events can include laser activation, 
+missile activation, speed token appearance, or gravity token appearance.*/
+void triggerRandomEvent()
 {
 	randomEvents = rand() % 6;
 	switch (eventsArray[randomEvents])
 	{
-	case lazerEvent:
+	case STATE_LASER_EVENT:
 		lazerMainFlag = true;
 		//newLaserFlag = true;
 		laserCounter = 0;
 		break;
-	case missleEvent:
+	case STATE_MISSILE_EVENT:
 		missleMainFlag = true;
 		break;
 		/*case zapperEvent:
 		zapperMainFlag = true;
 		break;*/
-	case speedtokenEvent:
+	case STATE_SPEED_TOKEN_EVENT:
 		speedTokenMainFlag = true;
 		break;
-	case gravitytokenEvent:
+	case STATE_GRAVITY_TOKEN_EVENT:
 		gravityTokenMainFlag = true;
 		break;
 	}
 }
 
-void play_game()
+/* Executes the main game logic. Updates the game display, 
+increases the score, and checks for various collision 
+conditions to update the game state.*/
+void executeGameLogic()
 {
-	mainDraw();
+	renderGameScreen();
 	score++;
 	if (SBDL::mouseInRect(pauseRect))
-		chum = pause;
+		currentGameState = STATE_PAUSE;
 	if (SBDL::hasIntersectionRect(barryRect, missleRect) && gravitySituation == false)
-		chum = gameOver;
+		currentGameState = STATE_GAME_OVER;
 	if (SBDL::hasIntersectionRect(barryRect, myZapperRect) && gravitySituation == false)
 	{
-		if (which_zapper == 1 || which_zapper == 2)
-			chum = gameOver;
+		if (currentZapper == 1 || currentZapper == 2)
+			currentGameState = STATE_GAME_OVER;
 		else
 		{
-			SDL_Rect angledZapper1 = { myZapper.x + 80 , myZapper.y , 40 , 40 };
-			SDL_Rect angledZapper2 = { myZapper.x + 40 , myZapper.y + 40 , 40 , 40 };
-			SDL_Rect angledZapper3 = { myZapper.x , myZapper.y + 80 , 40 , 40 };
+			SDL_Rect angledZapper1 = { obstacleZapper.x + 80 , obstacleZapper.y , 40 , 40 };
+			SDL_Rect angledZapper2 = { obstacleZapper.x + 40 , obstacleZapper.y + 40 , 40 , 40 };
+			SDL_Rect angledZapper3 = { obstacleZapper.x , obstacleZapper.y + 80 , 40 , 40 };
 			if (SBDL::hasIntersectionRect(barryRect, angledZapper1) || SBDL::hasIntersectionRect(barryRect, angledZapper2) || SBDL::hasIntersectionRect(barryRect, angledZapper3))
-				chum = gameOver;
+				currentGameState = STATE_GAME_OVER;
 		}
 	}
 	if (SBDL::hasIntersectionRect(barryRect, missleRect) && gravitySituation == true)
@@ -596,7 +677,7 @@ void play_game()
 		gravitySituation = true;
 		youngBarryFlag = false;
 		oldBarryFlag = false;
-		barryLocation.y = 380;
+		playerLocation.y = 380;
 		//how_is_barry = gravityBarryWalkDown;
 		SBDL::updateEvents();
 	}
@@ -612,69 +693,71 @@ void play_game()
 	}	*/
 	else if (SBDL::hasIntersectionRect(barryRect, myTokenRect))
 		tokenFlag = true;
-	how_is_barry = baryGoFast;
+	currentBarrySituation = BARRY_GO_FAST;
 }
 
+
+// BARRY
 void updateBarry()
 {
 	SBDL::updateEvents();
 	if (!gravitySituation)
 	{
-		if (barryLocation.x < 110)
+		if (playerLocation.x < 110)
 		{
-			barryLocation.x += 1;
+			playerLocation.x += 1;
 
-			if (walkingCounter % 12 < 6 && barryLocation.y >= 380)
+			if (walkingCounter % 12 < 6 && playerLocation.y >= 380)
 			{
-				how_is_barry = barryWalk;
+				currentBarrySituation = BARRY_WALK;
 				walkingCounter++;
 			}
-			else if (walkingCounter % 12 >= 6 && barryLocation.y >= 380)
+			else if (walkingCounter % 12 >= 6 && playerLocation.y >= 380)
 			{
-				how_is_barry = barryRun;
+				currentBarrySituation = BARRY_RUN;
 				walkingCounter++;
-				inFlying();
+				handleFlyingMovement();
 			}
-			inFlying();
+			handleFlyingMovement();
 		}
-		if (walkingCounter % 12 < 6 && barryLocation.y >= 380)
+		if (walkingCounter % 12 < 6 && playerLocation.y >= 380)
 		{
-			how_is_barry = barryWalk;
+			currentBarrySituation = BARRY_WALK;
 			walkingCounter++;
 		}
-		else if (walkingCounter % 12 >= 6 && barryLocation.y >= 380)
+		else if (walkingCounter % 12 >= 6 && playerLocation.y >= 380)
 		{
-			how_is_barry = barryRun;
+			currentBarrySituation = BARRY_RUN;
 			walkingCounter++;
 		}
-		inFlying();
+		handleFlyingMovement();
 	}
 	else
 	{
-		gravityFlyFall();
+		handleGravityFlyFall();
 	}
 }
 
-void drawBarry(barrySituation how_is_barry)
+void drawBarry()
 {
-	barryRect = { barryLocation.x, barryLocation.y, 40, 55 };
+	barryRect = { playerLocation.x, playerLocation.y, 40, 55 };
 	if (!gravitySituation)
 	{
-		switch (how_is_barry)
+		switch (currentBarrySituation)
 		{
-		case barryWalk:
+		case BARRY_WALK:
 			if (oldBarryFlag)
 				SBDL::showTexture(oldBarryWalkPic, barryRect);
 			else if (youngBarryFlag)
 				SBDL::showTexture(youngBarryWalkPic, barryRect);
 			break;
-		case barryRun:
+		case BARRY_RUN:
 			if (oldBarryFlag)
 				SBDL::showTexture(oldBarryRunPic, barryRect);
 			else if (youngBarryFlag)
 				SBDL::showTexture(youngBarryRunPic, barryRect);
 			break;
-		case barryFly:
+		case BARRY_FLY:
 			/*if (soundCounter % 100 == 7 && musicFlag)
 			{
 			SBDL::playSound(jetSound, 1);
@@ -687,7 +770,7 @@ void drawBarry(barrySituation how_is_barry)
 			else if (youngBarryFlag)
 				SBDL::showTexture(youngBarryRiseJet, barryRect);
 			break;
-		case barryFall:
+		case BARRY_FALL:
 			if (oldBarryFlag)
 				SBDL::showTexture(oldBarryFallPic, barryRect);
 			else if (youngBarryFlag)
@@ -697,17 +780,17 @@ void drawBarry(barrySituation how_is_barry)
 	}
 	else
 	{
-		switch (how_is_barry)
+		switch (currentBarrySituation)
 		{
-		case gravityBarryFall:
+		case BARRY_GRAVITY_FALL:
 			SBDL::showTexture(gravityBarryFallPic, barryRect);
 			SBDL::playSound(gravityFallSound, 1);
 			break;
-		case gravityBarryFly:
+		case BARRY_GRAVITY_FLY:
 			SBDL::showTexture(gravityBarryFlyPic, barryRect);
 			SBDL::playSound(gravityFlySound, 1);
 			break;
-		case gravityBarryWalkDown:
+		case BARRY_GRAVITY_WALK_DOWN:
 			if (walkingCounter % 12 < 6)
 			{
 				SBDL::showTexture(gravityBarryRunDownPic, barryRect);
@@ -719,7 +802,7 @@ void drawBarry(barrySituation how_is_barry)
 				walkingCounter++;
 			}
 			break;
-		case gravityBarryWalkUp:
+		case BARRY_GRAVITY_WALK_UP:
 			if (walkingCounter % 12 < 6)
 			{
 				SBDL::showTexture(gravityBarryRunUpPic, barryRect);
@@ -731,7 +814,7 @@ void drawBarry(barrySituation how_is_barry)
 				walkingCounter++;
 			}
 			break;
-		case baryGoFast:
+		case BARRY_GO_FAST:
 			if (oldBarryFlag)
 				SBDL::showTexture(oldBarryGoFast, barryRect);
 			else if (youngBarryFlag)
@@ -742,7 +825,103 @@ void drawBarry(barrySituation how_is_barry)
 
 }
 
-void updateBackGround()
+/*Manages the player's movement during the flying state. 
+It handles upward movement when the space key is held, 
+increasing the velocity and clamping the maximum height. 
+If the player is below a certain height, it handles the 
+transition from flying to falling, controlling 
+the velocity and clamping the minimum height.*/
+void handleFlyingMovement()
+{
+	SBDL::updateEvents();
+	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && playerLocation.y >= 30)
+	{
+		currentBarrySituation = BARRY_FLY;
+		playerLocation.y -= barryVelocityY;
+		if (accelerationCounter % 7 == 0)
+		{
+			barryVelocityY += acceleration;
+			accelerationCounter++;
+		}
+		else
+			accelerationCounter++;
+		flyStopFlag = true;
+		if (playerLocation.y > 376)
+			playerLocation.y = 380;
+	}
+	else if (playerLocation.y <= 370)
+	{
+		if (flyStopFlag)
+		{
+			currentBarrySituation = BARRY_FALL;
+			barryVelocityY = 0;
+			if (accelerationCounter % 7 == 0)
+			{
+				barryVelocityY += acceleration;
+				accelerationCounter++;
+			}
+			else
+				accelerationCounter++;
+			flyStopFlag = false;
+			if (playerLocation.y > 370)
+				playerLocation.y = 380;
+		}
+		else
+		{
+			currentBarrySituation = BARRY_FALL;
+			playerLocation.y += barryVelocityY;
+			if (accelerationCounter % 7 == 0)
+			{
+				barryVelocityY += acceleration;
+				accelerationCounter++;
+			}
+			else
+				accelerationCounter++;
+			if (playerLocation.y > 370)
+				playerLocation.y = 380;
+		}
+	}
+
+}
+
+
+/*Updates the gravity situation and handles the player character's
+vertical movement based on the gravity state. The player moves up 
+(gravityFly) or down (gravityFall) when the space key is held, 
+within specific bounds. Adjusts the player's position and updates 
+the current situation (gravityWalkUp or gravityWalkDown) when the
+upper or lower limit is reached.*/
+void handleGravityFlyFall()
+{
+	gravitySituation = true;
+	SBDL::updateEvents();
+	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && playerLocation.y <= 380 && playerLocation.y != 30)
+	{
+		gravitySituation = true;
+		currentBarrySituation = BARRY_GRAVITY_FLY;
+		playerLocation.y -= barryVelocityY;
+		if (playerLocation.y < 50)
+		{
+			playerLocation.y = 30;
+			currentBarrySituation = BARRY_GRAVITY_WALK_UP;
+		}
+	}
+	SBDL::updateEvents();
+	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && playerLocation.y >= 30 && playerLocation.y != 380)
+	{
+		currentBarrySituation = BARRY_GRAVITY_FALL;
+		playerLocation.y += barryVelocityY;
+		if (playerLocation.y > 360)
+		{
+			playerLocation.y = 380;
+			currentBarrySituation = BARRY_GRAVITY_WALK_DOWN;
+		}
+	}
+}
+
+
+// BACKGROUND
+void updateBackground()
 {
 	if (backArray[9].x <= 0)
 	{
@@ -772,7 +951,7 @@ void updateBackGround()
 	{
 		backVelocity = -150;
 		notForgetCounter++;
-		how_is_barry = baryGoFast;
+		currentBarrySituation = BARRY_GO_FAST;
 		backArray[0].x += backVelocity;
 		SBDL::showTexture(oldBarryGoFast, barryRect);
 		tokenFlag = false;
@@ -780,13 +959,13 @@ void updateBackGround()
 	}
 	else if (notForgetCounter == 1)
 	{
-		barryLocation.x = 380;
+		playerLocation.x = 380;
 		backVelocity = -7;
 	}
 	backArray[0].x += backVelocity;
 }
 
-void drawBackGround(backgroundTypes how_is_back)
+void drawBackground()
 {
 	if (!finishFlag)
 	{
@@ -806,35 +985,46 @@ void drawBackGround(backgroundTypes how_is_back)
 		}
 }
 
+
+// ZAPPER
+void initZapper()
+{
+	currentZapper = rand() % 3;
+	currentZapperY = rand() % 2 + 1;
+	obstacleZapper = zappersArray[currentZapper];
+	obstacleZapper.y = zapperY[currentZapperY];
+	obstacleZapper.x = 850 + rand() % 100;
+}
+
 void updateZapper()
 {
 	//if (!lazerMainFlag)
 	{
-		if (myZapper.x < -150)
+		if (obstacleZapper.x < -150)
 			initZapper();
-		myZapper.x += zapperVelocity;
+		obstacleZapper.x += zapperVelocity;
 
 		if (zapperCounter % 24 < 6)
 		{
-			how_is_zapper = firstZap;
+			currentZapperState = ZAPPER_FIRST;
 			zapperCounter++;
 		}
 
 		else if (zapperCounter % 24 >= 6 && zapperCounter % 24 < 12)
 		{
-			how_is_zapper = secondZap;
+			currentZapperState = ZAPPER_SECOND;
 			zapperCounter++;
 		}
 
 		else if (zapperCounter % 24 >= 12 && zapperCounter % 24 < 18)
 		{
-			how_is_zapper = thirdZap;
+			currentZapperState = ZAPPER_THIRD;
 			zapperCounter++;
 		}
 
 		else if (zapperCounter % 24 >= 18)
 		{
-			how_is_zapper = fourthZap;
+			currentZapperState = ZAPPER_FOURTH;
 			zapperCounter++;
 		}
 
@@ -842,100 +1032,111 @@ void updateZapper()
 	}
 }
 
-void drawZapper(zapperShowing how_is_zapper)
+void drawZapper()
 {
 	//if (!lazerMainFlag)
 	{
-		switch (how_is_zapper)
+		switch (currentZapperState)
 		{
-		case firstZap:
-			switch (which_zapper)
+		case ZAPPER_FIRST:
+			switch (currentZapper)
 			{
 			case 0:
-				myZapperRect = { myZapper.x, myZapper.y, 120, 120 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 120, 120 };
 				break;
 			case 1:
-				myZapperRect = { myZapper.x, myZapper.y, 150, 50 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 150, 50 };
 				break;
 			case 2:
-				myZapperRect = { myZapper.x, myZapper.y, 50, 150 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 50, 150 };
 			}
-			SBDL::showTexture(myZapper.first, myZapperRect);
+			SBDL::showTexture(obstacleZapper.first, myZapperRect);
 			break;
-		case secondZap:
-			switch (which_zapper)
+		case ZAPPER_SECOND:
+			switch (currentZapper)
 			{
 			case 0:
-				myZapperRect = { myZapper.x, myZapper.y, 120, 120 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 120, 120 };
 				break;
 			case 1:
-				myZapperRect = { myZapper.x, myZapper.y, 150, 50 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 150, 50 };
 				break;
 			case 2:
-				myZapperRect = { myZapper.x, myZapper.y, 50, 150 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 50, 150 };
 			}
-			SBDL::showTexture(myZapper.second, myZapperRect);
+			SBDL::showTexture(obstacleZapper.second, myZapperRect);
 			break;
-		case thirdZap:
-			switch (which_zapper)
+		case ZAPPER_THIRD:
+			switch (currentZapper)
 			{
 			case 0:
-				myZapperRect = { myZapper.x, myZapper.y, 120, 120 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 120, 120 };
 				break;
 			case 1:
-				myZapperRect = { myZapper.x, myZapper.y, 150, 50 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 150, 50 };
 				break;
 			case 2:
-				myZapperRect = { myZapper.x, myZapper.y, 50, 150 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 50, 150 };
 			}
-			SBDL::showTexture(myZapper.third, myZapperRect);
+			SBDL::showTexture(obstacleZapper.third, myZapperRect);
 			break;
-		case fourthZap:
-			switch (which_zapper)
+		case ZAPPER_FOURTH:
+			switch (currentZapper)
 			{
 			case 0:
-				myZapperRect = { myZapper.x, myZapper.y, 120, 120 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 120, 120 };
 				break;
 			case 1:
-				myZapperRect = { myZapper.x, myZapper.y, 150, 50 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 150, 50 };
 				break;
 			case 2:
-				myZapperRect = { myZapper.x, myZapper.y, 50, 150 };
+				myZapperRect = { obstacleZapper.x, obstacleZapper.y, 50, 150 };
 			}
-			SBDL::showTexture(myZapper.fourth, myZapperRect);
+			SBDL::showTexture(obstacleZapper.fourth, myZapperRect);
 			break;
 		}
 	}
 }
 
-void initZapper()
+/*Manages the zapper functionality. Resets and triggers 
+a random event when the zapper reaches a specific position. 
+Updates and draws the zapper when the zapperMainFlag is true.*/
+void handleZapper()
 {
-	which_zapper = rand() % 3;
-	which_zapper_y = rand() % 2 + 1;
-	myZapper = zappersArray[which_zapper];
-	myZapper.y = zapper_y[which_zapper_y];
-	myZapper.x = 850 + rand() % 100;
+	if (obstacleZapper.x < -120 && obstacleZapper.x > -150)
+	{
+		zapperMainFlag = false;
+		obstacleZapper.x = -200;
+		triggerRandomEvent();
+	}
+	if (zapperMainFlag)
+	{
+		updateZapper();
+		drawZapper();
+	}
 }
 
+
+// MENU
 void updateMenu()
 {
 	SBDL::updateEvents();
 	menuClickRect = { menuClickCore.x, menuClickCore.y , 60 , 70 };
-	homeBarryRect = { barryPoster.x , barryPoster.y , barryPosterSize_x, barryPosterSize_y };
-	menuRect = { menuLocation.x, menuLocation.y, window_width, window_height };
+	homeBarryRect = { barryPoster.x , barryPoster.y , barryPosterSizeX, barryPosterSizeY };
+	menuRect = { menuLocation.x, menuLocation.y, WINDOW_WIDTH, WINDOW_HEIGHT };
 	if (menuCounter % 12 < 4)
 	{
-		how_is_menu = poster1;
+		currentHomeMenuState = HOME_POSTER1;
 		menuCounter++;
 	}
 	else if (menuCounter % 12 >= 4 && menuCounter % 12 < 8)
 	{
-		how_is_menu = poster2;
+		currentHomeMenuState = HOME_POSTER2;
 		menuCounter++;
 	}
 	else if (menuCounter % 12 >= 8)
 	{
-		how_is_menu = poster3;
+		currentHomeMenuState = HOME_POSTER3;
 		menuCounter++;
 	}
 	anywhere1 = { 0 , 0, 750, 70 };
@@ -947,8 +1148,8 @@ void updateMenu()
 		menuLocation.x = 0;
 		barryPoster.x -= 70;
 		menuClickCore.x = 510;
-		barryPosterSize_x = 400;
-		barryPosterSize_y = 200;
+		barryPosterSizeX = 400;
+		barryPosterSizeY = 200;
 		clickAnyWhereFlag = false;
 	}
 	else if (SBDL::mouseInRect(menuClickRect) && SBDL::Mouse.clicked() && menuClickCore.x == 510)
@@ -956,8 +1157,8 @@ void updateMenu()
 		menuLocation.x = 240;
 		barryPoster.x += 70;
 		menuClickCore.x = 750;
-		barryPosterSize_x = 600;
-		barryPosterSize_y = 300;
+		barryPosterSizeX = 600;
+		barryPosterSizeY = 300;
 		clickAnyWhereFlag = true;
 	}
 	else if (SBDL::mouseInRect(changeBarryRect) && SBDL::Mouse.clicked() && menuClickCore.x == 510)
@@ -972,40 +1173,40 @@ void updateMenu()
 			youngBarryFlag = false;
 			oldBarryFlag = true;
 		}
-		how_is_menu = changeBarry;
+		currentHomeMenuState = HOME_CHANGE_BARRY;
 		changeBarryFlag = true;
 	}
 	else if (SBDL::mouseInRect(quitRect) && SBDL::Mouse.clicked() && menuClickCore.x == 510)
 		exit(1);
-	else if (SBDL::mouseInRect(oldRect) && SBDL::Mouse.clicked() && how_is_menu == changeBarry)
+	else if (SBDL::mouseInRect(oldRect) && SBDL::Mouse.clicked() && currentHomeMenuState == HOME_CHANGE_BARRY)
 	{
 		changeBarryFlag = false;
 		oldBarryFlag = true;
 		youngBarryFlag = false;
 	}
-	else if (SBDL::mouseInRect(youngRect) && SBDL::Mouse.clicked() && how_is_menu == changeBarry)
+	else if (SBDL::mouseInRect(youngRect) && SBDL::Mouse.clicked() && currentHomeMenuState == HOME_CHANGE_BARRY)
 	{
 		changeBarryFlag = false;
 		youngBarryFlag = true;
 		oldBarryFlag = false;
 	}
-	else if ((SBDL::mouseInRect(anywhere1) || SBDL::mouseInRect(anywhere2)) && SBDL::Mouse.clicked() && menuClickCore.x == 750 && how_is_menu != changeBarry)
+	else if ((SBDL::mouseInRect(anywhere1) || SBDL::mouseInRect(anywhere2)) && SBDL::Mouse.clicked() && menuClickCore.x == 750 && currentHomeMenuState != HOME_CHANGE_BARRY)
 	{
-		initializer();
-		chum = play;
+		initializeGameVariables();
+		currentGameState = STATE_PLAY;
 	}
-	else if ((SBDL::mouseInRect(anywhere3) || SBDL::mouseInRect(anywhere4)) && SBDL::Mouse.clicked() && menuClickCore.x == 510 && how_is_menu != changeBarry)
+	else if ((SBDL::mouseInRect(anywhere3) || SBDL::mouseInRect(anywhere4)) && SBDL::Mouse.clicked() && menuClickCore.x == 510 && currentHomeMenuState != HOME_CHANGE_BARRY)
 	{
-		initializer();
-		chum = play;
+		initializeGameVariables();
+		currentGameState = STATE_PLAY;
 	}
 }
 
-void drawMenu(homeMenu how_is_menu)
+void drawMenu(HomeMenuState currentHomeMenuState)
 {
-	switch (how_is_menu)
+	switch (currentHomeMenuState)
 	{
-	case poster1:
+	case HOME_POSTER1:
 		if (changeBarryFlag)
 		{
 			SBDL::showTexture(darkBlackBack, windowRect);
@@ -1022,7 +1223,7 @@ void drawMenu(homeMenu how_is_menu)
 				SBDL::showTexture(clickAnyWhere1, clickAnyWhereRect);
 		}
 		break;
-	case poster2:
+	case HOME_POSTER2:
 		if (changeBarryFlag)
 		{
 			SBDL::showTexture(darkBlackBack, windowRect);
@@ -1042,7 +1243,7 @@ void drawMenu(homeMenu how_is_menu)
 				SBDL::showTexture(clickAnyWhere2, clickAnyWhereRect);
 		}
 		break;
-	case poster3:
+	case HOME_POSTER3:
 		if (changeBarryFlag)
 		{
 			SBDL::showTexture(darkBlackBack, windowRect);
@@ -1062,7 +1263,7 @@ void drawMenu(homeMenu how_is_menu)
 				SBDL::showTexture(clickAnyWhere3, clickAnyWhereRect);
 		}
 		break;
-	case changeBarry:
+	case HOME_CHANGE_BARRY:
 		SBDL::showTexture(darkBlackBack, windowRect);
 		SBDL::showTexture(oldBarryRunPic, oldRect);
 		SBDL::showTexture(youngBarryRunPic, youngRect);
@@ -1073,131 +1274,80 @@ void drawMenu(homeMenu how_is_menu)
 	}
 }
 
-void inFlying()
-{
-	SBDL::updateEvents();
-	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && barryLocation.y >= 30)
-	{
-		how_is_barry = barryFly;
-		barryLocation.y -= barryVelocity_y;
-		if (accelerationCounter % 7 == 0)
-		{
-			barryVelocity_y += shetab;
-			accelerationCounter++;
-		}
-		else
-			accelerationCounter++;
-		flyStopFlag = true;
-		if (barryLocation.y > 376)
-			barryLocation.y = 380;
-	}
-	else if (barryLocation.y <= 370)
-	{
-		if (flyStopFlag)
-		{
-			how_is_barry = barryFall;
-			barryVelocity_y = 0;
-			if (accelerationCounter % 7 == 0)
-			{
-				barryVelocity_y += shetab;
-				accelerationCounter++;
-			}
-			else
-				accelerationCounter++;
-			flyStopFlag = false;
-			if (barryLocation.y > 370)
-				barryLocation.y = 380;
-		}
-		else
-		{
-			how_is_barry = barryFall;
-			barryLocation.y += barryVelocity_y;
-			if (accelerationCounter % 7 == 0)
-			{
-				barryVelocity_y += shetab;
-				accelerationCounter++;
-			}
-			else
-				accelerationCounter++;
-			if (barryLocation.y > 370)
-				barryLocation.y = 380;
-		}
-	}
 
-}
-
+// MISSLE
 void updateMissle()
 {
-	if (myMissle.x < -150)
+	if (playerMissle.x < -150)
 	{
-		myMissle.x = 900 + rand() % 150;
+		playerMissle.x = 900 + rand() % 150;
 	}
-	else if (myMissle.x >= 820)
+	else if (playerMissle.x >= 820)
 	{
-		how_is_missle = missleFar;
-		redWarLoc.x = 750;
-		redWarLoc.y = barryLocation.y;
-		myMissle.y = barryLocation.y;
-		myMissle.x -= 10;
+		currentMissileState = MISSILE_FAR;
+		redWarriorLocation.x = 750;
+		redWarriorLocation.y = playerLocation.y;
+		playerMissle.y = playerLocation.y;
+		playerMissle.x -= 10;
 	}
-	else if (myMissle.x < 830 && myMissle.x > 800)
+	else if (playerMissle.x < 830 && playerMissle.x > 800)
 	{
-		how_is_missle = missleNear;
-		yellowWarLoc.x = 750;
-		yellowWarLoc.y = barryLocation.y;
-		myMissle.y = barryLocation.y;
-		myMissle.x -= 10;
+		currentMissileState = MISSILE_NEAR;
+		yellowWarriorLocation.x = 750;
+		yellowWarriorLocation.y = playerLocation.y;
+		playerMissle.y = playerLocation.y;
+		playerMissle.x -= 10;
 	}
-	else if (myMissle.x <= 800)
+	else if (playerMissle.x <= 800)
 	{
-		how_is_missle = missleIn;
-		myMissle.x -= 10;
+		currentMissileState = MISSILE_IN;
+		playerMissle.x -= 10;
 	}
 
 }
 
-void drawMissle(missleShowing how_is_missle)
+void drawMissle(MissileState currentMissileState)
 {
-	switch (how_is_missle)
+	switch (currentMissileState)
 	{
-	case missleFar:
-		warningRect = { 750 , redWarLoc.y , 50 , 50 };
+	case MISSILE_FAR:
+		warningRect = { 750 , redWarriorLocation.y , 50 , 50 };
 		SBDL::showTexture(redWarning, warningRect);
 		break;
-	case missleNear:
-		warningRect = { yellowWarLoc.x , yellowWarLoc.y , 50 , 50 };
+	case MISSILE_NEAR:
+		warningRect = { yellowWarriorLocation.x , yellowWarriorLocation.y , 50 , 50 };
 		SBDL::showTexture(yellowWarning, warningRect);
 		break;
-	case missleIn:
-		missleRect = { myMissle.x , myMissle.y , 60 , 60 };
+	case MISSILE_IN:
+		missleRect = { playerMissle.x , playerMissle.y , 60 , 60 };
 		if (missleCounter % 18 < 3)
 		{
-			SBDL::showTexture(myMissle.picArray[0], missleRect);
+			SBDL::showTexture(playerMissle.picArray[0], missleRect);
 			missleCounter++;
 		}
 		else if (missleCounter % 18 >= 3 && missleCounter % 18 < 6)
 		{
-			SBDL::showTexture(myMissle.picArray[1], missleRect);
+			SBDL::showTexture(playerMissle.picArray[1], missleRect);
 			missleCounter++;
 		}
 		else if (missleCounter % 18 >= 6 && missleCounter % 18 < 9)
 		{
-			SBDL::showTexture(myMissle.picArray[2], missleRect);
+			SBDL::showTexture(playerMissle.picArray[2], missleRect);
 			missleCounter++;
 		}
 		else if (missleCounter % 18 >= 9 && missleCounter % 18 < 12)
 		{
-			SBDL::showTexture(myMissle.picArray[3], missleRect);
+			SBDL::showTexture(playerMissle.picArray[3], missleRect);
 			missleCounter++;
 		}
 		else if (missleCounter % 18 >= 12 && missleCounter % 18 < 15)
 		{
-			SBDL::showTexture(myMissle.picArray[4], missleRect);
+			SBDL::showTexture(playerMissle.picArray[4], missleRect);
 			missleCounter++;
 		}
 		else if (missleCounter % 18 >= 15 && missleCounter % 18 < 18)
 		{
-			SBDL::showTexture(myMissle.picArray[5], missleRect);
+			SBDL::showTexture(playerMissle.picArray[5], missleRect);
 			missleCounter++;
 		}
 
@@ -1266,88 +1416,35 @@ void drawMissle(missleShowing how_is_missle)
 	}
 }
 
-void pausePageFun()
+/*Manages the missile functionality. Resets and triggers 
+a random event when the missile reaches a specific position. 
+Updates and draws the missile when the missleMainFlag is true.*/
+void handleMissile()
 {
-	pausePageHomeRect = { 300 , 200, 200, 70 };
-	SBDL::showTexture(darkBlackBack, windowRect);
-	SBDL::showTexture(retryPic, retryRect);
-	SBDL::showTexture(homePicClick, pausePageHomeRect);
-	SBDL::showTexture(resumePic, resumeRect);
-	SBDL::showTexture(showPaused, showPausedRect);
-	SBDL::updateEvents();
-
-	if (SBDL::mouseInRect(resumeRect) && SBDL::Mouse.clicked())
+	if (playerMissle.x < -100 && playerMissle.x > -150)
 	{
-		chum = play;
+		missleMainFlag = false;
+		playerMissle.x = -200;
+		triggerRandomEvent();
 	}
-
-	else if (SBDL::mouseInRect(pausePageHomeRect) && SBDL::Mouse.clicked())
+	if (missleMainFlag)
 	{
-		initializer();
-		chum = home;
-	}
-
-	else if (SBDL::mouseInRect(retryRect) && SBDL::Mouse.clicked())
-	{
-		initializer();
-		chum = play;
+		updateMissle();
+		drawMissle(currentMissileState);
 	}
 }
 
-void gameOverPageFun()
-{
-	updateGameOverPage();
-	drawGameOverPage();
-}
 
-void updateGameOverPage()
-{
-	SBDL::updateEvents();
-	if (SBDL::mouseInRect(gameoverRetryRect) && SBDL::Mouse.clicked())
-	{
-		initializer();
-		chum = play;
-	}
-	else if (SBDL::mouseInRect(gameoverHomeRect) && SBDL::Mouse.clicked())
-	{
-		initializer();
-		chum = home;
-	}
-}
-
-void drawGameOverPage()
-{
-	fontTexture = SBDL::createFontTexture(scoreFont, std::to_string(score / 10), 0, 0, 0);
-	SBDL::showTexture(darkBlackBack, windowRect);
-	SDL_Rect showPosterRect = { 30 , 20 , 350 , 250 };
-	if (gameoverCounter % 12 < 6)
-	{
-		SBDL::showTexture(homePic, showPosterRect);
-		gameoverCounter++;
-	}
-	else
-	{
-		SBDL::showTexture(homePic2, showPosterRect);
-		gameoverCounter++;
-	}
-	SBDL::showTexture(retryPic, gameoverRetryRect);
-	SBDL::showTexture(homePicClick, gameoverHomeRect);
-	SDL_Rect scoreRect = { 450 , 50 , 300 , 150 };
-	SBDL::showTexture(yourScoreText, scoreRect);
-	scoreRect = { 530 , 190 , 150 , 70 };
-	SBDL::showTexture(fontTexture, scoreRect);
-
-}
-
+// LASER
 void updateLaser()
 {
 	if (laserCounter == 0)
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			which_lazer_y = rand() % 6;
-			mylazer[i].y = lazer_y[which_lazer_y];
-			mylazer[i].existance = rand() % 2;
+			currentLaserY = rand() % 6;
+			playerLaser[i].y = laserY[currentLaserY];
+			playerLaser[i].existance = rand() % 2;
 		}
 		laserCounter++;
 	}
@@ -1355,65 +1452,87 @@ void updateLaser()
 	{
 		if (laserCounter % 100 < 50)
 		{
-			how_is_laser = nonactive;
+			currentLaserState = LASER_NONACTIVE;
 			laserCounter++;
 		}
 		else if (laserCounter % 100 >= 50 && laserCounter % 50 < 75)
 		{
-			how_is_laser = active1;
+			currentLaserState = LASER_ACTIVE1;
 			laserCounter++;
 		}
 		else if (laserCounter % 100 >= 75 && laserCounter % 100 < 100)
 		{
-			how_is_laser = active2;
+			currentLaserState = LASER_ACTIVE2;
 			laserCounter++;
 		}
 	}
 }
 
-void drawLaser(laserShowing how_is_laser)
+void drawLaser(LaserState currentLaserState)
 {
-	switch (how_is_laser)
+	switch (currentLaserState)
 	{
-	case nonactive:
+	case LASER_NONACTIVE:
 		for (int i = 0; i < 5; i++)
 		{
-			mylazer[i].Rect = { 30 , mylazer[i].y , 740 , 50 };
-			if (mylazer[i].existance = 1)
-				SBDL::showTexture(mylazer[i].nonactive, myLazerRect);
+			playerLaser[i].rect = { 30 , playerLaser[i].y , 740 , 50 };
+			if (playerLaser[i].existance = 1)
+				SBDL::showTexture(playerLaser[i].nonactive, myLazerRect);
 		}
 		break;
-	case active1:
+	case LASER_ACTIVE1:
 		for (int i = 0; i < 5; i++)
 		{
-			myLazerRect = { 30 , mylazer[i].y , 740 , 50 };
-			if (mylazer[i].existance = 1)
-				SBDL::showTexture(mylazer[i].active1, myLazerRect);
+			myLazerRect = { 30 , playerLaser[i].y , 740 , 50 };
+			if (playerLaser[i].existance = 1)
+				SBDL::showTexture(playerLaser[i].active1, myLazerRect);
 		}
 		break;
-	case active2:
+	case LASER_ACTIVE2:
 		for (int i = 0; i < 5; i++)
 		{
-			myLazerRect = { 30 , mylazer[i].y , 740 , 50 };
-			if (mylazer[i].existance = 1)
-				SBDL::showTexture(mylazer[i].active2, myLazerRect);
+			myLazerRect = { 30 , playerLaser[i].y , 740 , 50 };
+			if (playerLaser[i].existance = 1)
+				SBDL::showTexture(playerLaser[i].active2, myLazerRect);
 		}
 		break;
 	}
 }
 
+/*Manages the laser functionality. If lazerMainFlag is true, 
+it updates and draws the laser. If the laserCounter reaches 99, 
+the lazerMainFlag is set to false, the laserCounter is reset, 
+and a random event is triggered.*/
+void handleLaser()
+{
+	if (lazerMainFlag)
+	{
+		updateLaser();
+		drawLaser(currentLaserState);
+	}
+	if (laserCounter == 99)
+	{
+		lazerMainFlag = false;
+		laserCounter = 0;
+		triggerRandomEvent();
+	}
+
+}
+
+
+// SPEED TOKEN
 void updateSpeedToken()
 {
-	myTokenRect = { myToken.x , tempToken_y , 60 , 60 };
-	if (myToken.x < -150)
+	myTokenRect = { obstacleToken.x , tempTokenY , 60 , 60 };
+	if (obstacleToken.x < -150)
 	{
 		//while (myToken.x - myZapper.x < 50 || myToken.x - myZapper.x > -50)
-		myToken.x = 830 + rand() % 100;
+		obstacleToken.x = 830 + rand() % 100;
 		//while (myToken.y - myZapper.y < 50 || myToken.y - myZapper.y > -50)
-		myToken.y = 50 + rand() % 350;
-		tempToken_y = myToken.y;
+		obstacleToken.y = 50 + rand() % 350;
+		tempTokenY = obstacleToken.y;
 	}
-	myToken.x += backVelocity;
+	obstacleToken.x += backVelocity;
 }
 
 void drawSpeedToken()
@@ -1422,22 +1541,22 @@ void drawSpeedToken()
 	{
 		if (tokenCounter % 24 < 6)
 		{
-			SBDL::showTexture(myToken.pic1, myTokenRect);
+			SBDL::showTexture(obstacleToken.pic1, myTokenRect);
 			tokenCounter++;
 		}
 		if (tokenCounter % 24 >= 6 && tokenCounter % 24 < 12)
 		{
-			SBDL::showTexture(myToken.pic2, myTokenRect);
+			SBDL::showTexture(obstacleToken.pic2, myTokenRect);
 			tokenCounter++;
 		}
 		if (tokenCounter % 24 >= 12 && tokenCounter % 24 < 18)
 		{
-			SBDL::showTexture(myToken.pic3, myTokenRect);
+			SBDL::showTexture(obstacleToken.pic3, myTokenRect);
 			tokenCounter++;
 		}
 		if (tokenCounter % 24 >= 18 && tokenCounter % 24 < 24)
 		{
-			SBDL::showTexture(myToken.pic4, myTokenRect);
+			SBDL::showTexture(obstacleToken.pic4, myTokenRect);
 			tokenCounter++;
 		}
 	}
@@ -1448,7 +1567,7 @@ void drawSpeedToken()
 		SBDL::clearRenderScreen();
 		int tokenStartTime = SBDL::getTime();
 		updateBackGround();
-		drawBackGround(how_is_back);
+		drawBackGround();
 		SBDL::showTexture(oldBarryGoFast, barryRect);
 		int tokenElapsedTime = SBDL::getTime() - startTime;
 		if (elapsedTime < delay)
@@ -1458,20 +1577,39 @@ void drawSpeedToken()
 	}
 }
 
+/*Manages the speed token functionality. Resets and triggers 
+a random event when the speed token reaches a specific position. 
+Updates and draws the speed token when the speedTokenMainFlag is true.*/
+void handleSpeedToken()
+{
+	if (obstacleToken.x < -100 && obstacleToken.x > -150)
+	{
+		speedTokenMainFlag = false;
+		obstacleToken.x = -200;
+		triggerRandomEvent();
+	}
+	if (speedTokenMainFlag)
+	{
+		updateSpeedToken();
+		drawSpeedToken();
+	}
+}
+
+// GRAVITY TOEKN
 void updateGravityToken()
 {
-	if (gToken.x < -150)
+	if (gravityTokenCore.x < -150)
 	{
-		gToken.x = 850 + rand() % 100;
-		gToken.y = 30 + rand() % 350;
+		gravityTokenCore.x = 850 + rand() % 100;
+		gravityTokenCore.y = 30 + rand() % 350;
 
 	}
-	gToken.x += backVelocity;
+	gravityTokenCore.x += backVelocity;
 }
 
 void drawGravityToken()
 {
-	GTokenRect = { gToken.x , gToken.y , 50 , 50 };
+	GTokenRect = { gravityTokenCore.x , gravityTokenCore.y , 50 , 50 };
 	if (GtokenConter % 44 < 4)
 	{
 		SBDL::showTexture(gravityToken, GTokenRect);
@@ -1529,87 +1667,16 @@ void drawGravityToken()
 	}
 }
 
-void gravityFlyFall()
+/*Manages the gravity token functionality. Resets and triggers 
+a random event when the gravity token reaches a specific position. 
+Updates and draws the gravity token when the gravityTokenMainFlag is true.*/
+void handleGravityToken()
 {
-	gravitySituation = true;
-	SBDL::updateEvents();
-	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && barryLocation.y <= 380 && barryLocation.y != 30)
-	{
-		gravitySituation = true;
-		how_is_barry = gravityBarryFly;
-		barryLocation.y -= barryVelocity_y;
-		if (barryLocation.y < 50)
-		{
-			barryLocation.y = 30;
-			how_is_barry = gravityBarryWalkUp;
-		}
-	}
-	SBDL::updateEvents();
-	if (SBDL::keyHeld(SDL_SCANCODE_SPACE) && barryLocation.y >= 30 && barryLocation.y != 380)
-	{
-		how_is_barry = gravityBarryFall;
-		barryLocation.y += barryVelocity_y;
-		if (barryLocation.y > 360)
-		{
-			barryLocation.y = 380;
-			how_is_barry = gravityBarryWalkDown;
-		}
-	}
-}
-
-void zapperFun()
-{
-	if (myZapper.x < -120 && myZapper.x > -150)
-	{
-		zapperMainFlag = false;
-		myZapper.x = -200;
-		happenings();
-	}
-	if (zapperMainFlag)
-	{
-		updateZapper();
-		drawZapper(how_is_zapper);
-	}
-}
-
-void missleFun()
-{
-	if (myMissle.x < -100 && myMissle.x > -150)
-	{
-		missleMainFlag = false;
-		myMissle.x = -200;
-		happenings();
-	}
-	if (missleMainFlag)
-	{
-		updateMissle();
-		drawMissle(how_is_missle);
-	}
-}
-
-void lazerFun()
-{
-	if (lazerMainFlag)
-	{
-		updateLaser();
-		drawLaser(how_is_laser);
-	}
-	if (laserCounter == 99)
-	{
-		lazerMainFlag = false;
-		laserCounter = 0;
-		happenings();
-	}
-
-}
-
-void gravityFun()
-{
-	if (gToken.x < -100 && gToken.x > -150)
+	if (gravityTokenCore.x < -100 && gravityTokenCore.x > -150)
 	{
 		gravityTokenMainFlag = false;
-		gToken.x = -200;
-		happenings();
+		gravityTokenCore.x = -200;
+		triggerRandomEvent();
 	}
 	if (gravityTokenMainFlag)
 	{
@@ -1618,17 +1685,82 @@ void gravityFun()
 	}
 }
 
-void speedFun()
+
+// GAME OVER
+void updateGameOverPage()
 {
-	if (myToken.x < -100 && myToken.x > -150)
+	SBDL::updateEvents();
+	if (SBDL::mouseInRect(gameoverRetryRect) && SBDL::Mouse.clicked())
 	{
-		speedTokenMainFlag = false;
-		myToken.x = -200;
-		happenings();
+		initializeGameVariables();
+		currentGameState = STATE_PLAY;
 	}
-	if (speedTokenMainFlag)
+	else if (SBDL::mouseInRect(gameoverHomeRect) && SBDL::Mouse.clicked())
 	{
-		updateSpeedToken();
-		drawSpeedToken();
+		initializeGameVariables();
+		currentGameState = STATE_HOME;
+	}
+}
+
+void drawGameOverPage()
+{
+	fontTexture = SBDL::createFontTexture(scoreFont, std::to_string(score / 10), 0, 0, 0);
+	SBDL::showTexture(darkBlackBack, windowRect);
+	SDL_Rect showPosterRect = { 30 , 20 , 350 , 250 };
+	if (gameoverCounter % 12 < 6)
+	{
+		SBDL::showTexture(homePic, showPosterRect);
+		gameoverCounter++;
+	}
+	else
+	{
+		SBDL::showTexture(homePic2, showPosterRect);
+		gameoverCounter++;
+	}
+	SBDL::showTexture(retryPic, gameoverRetryRect);
+	SBDL::showTexture(homePicClick, gameoverHomeRect);
+	SDL_Rect scoreRect = { 450 , 50 , 300 , 150 };
+	SBDL::showTexture(yourScoreText, scoreRect);
+	scoreRect = { 530 , 190 , 150 , 70 };
+	SBDL::showTexture(fontTexture, scoreRect);
+
+}
+
+/*Updates and draws the game over page to display the game over screen.*/
+void handleGameOverPage()
+{
+	updateGameOverPage();
+	drawGameOverPage();
+}
+
+
+/*Displays the pause page with options to resume, go to the home menu, 
+or retry the game. It shows the appropriate textures and checks
+for mouse clicks to handle the corresponding actions.*/
+void displayPausePage()
+{
+	pausePageHomeRect = { 300 , 200, 200, 70 };
+	SBDL::showTexture(darkBlackBack, windowRect);
+	SBDL::showTexture(retryPic, retryRect);
+	SBDL::showTexture(homePicClick, pausePageHomeRect);
+	SBDL::showTexture(resumePic, resumeRect);
+	SBDL::showTexture(showPaused, showPausedRect);
+	SBDL::updateEvents();
+
+	if (SBDL::mouseInRect(resumeRect) && SBDL::Mouse.clicked())
+	{
+		currentGameState = STATE_PLAY;
+	}
+
+	else if (SBDL::mouseInRect(pausePageHomeRect) && SBDL::Mouse.clicked())
+	{
+		initializeGameVariables();
+		currentGameState = STATE_HOME;
+	}
+
+	else if (SBDL::mouseInRect(retryRect) && SBDL::Mouse.clicked())
+	{
+		initializeGameVariables();
+		currentGameState = STATE_PLAY;
 	}
 }
