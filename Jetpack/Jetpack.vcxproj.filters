@@ -27,12 +27,18 @@
     <ClInclude Include="SBDL.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="zapper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Jetpack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

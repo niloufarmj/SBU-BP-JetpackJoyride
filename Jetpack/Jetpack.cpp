@@ -204,7 +204,7 @@ bool tokenFlag = false;
 bool gravitySituation = false;
 bool flyGravityFlag = false;
 bool fallGravityFlag = false;
-bool lazerMainFlag;
+bool laserMainFlag;
 bool missleMainFlag;
 bool zapperMainFlag;
 bool speedTokenMainFlag;
@@ -618,11 +618,11 @@ void triggerRandomEvent()
 	randomEvents = rand() % 6;
 	switch (eventsArray[randomEvents])
 	{
-	case STATE_LASER_EVENT:
-		lazerMainFlag = true;
-		//newLaserFlag = true;
-		laserCounter = 0;
-		break;
+	// case STATE_LASER_EVENT:
+	// 	laserMainFlag = true;
+	// 	//newLaserFlag = true;
+	// 	laserCounter = 0;
+	// 	break;
 	case STATE_MISSILE_EVENT:
 		missleMainFlag = true;
 		break;
@@ -681,17 +681,15 @@ void executeGameLogic()
 		//how_is_barry = gravityBarryWalkDown;
 		SBDL::updateEvents();
 	}
-	/*for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 	{
-	if (SBDL::hasIntersectionRect(barryRect, mylazer[i].Rect) && (how_is_laser == active1 || how_is_laser == active2) && gravitySituation == false)
-	chum = gameOver;
-	if (SBDL::hasIntersectionRect(barryRect, mylazer[i].Rect) && (how_is_laser == active1 || how_is_laser == active2) && gravitySituation == true)
-	{
-	gravitySituation = false;
-	youngBarryFlag = true;
-	}
-	}	*/
-	else if (SBDL::hasIntersectionRect(barryRect, myTokenRect))
+		if (SBDL::hasIntersectionRect(barryRect, playerLaser[i].rect) && (currentLaserState == LASER_ACTIVE1 || currentLaserState == LASER_ACTIVE2) && laserMainFlag && playerLaser[i].existance == 1) {
+			currentGameState = STATE_GAME_OVER;
+			laserMainFlag = false;
+		}
+			
+	}	
+	if (SBDL::hasIntersectionRect(barryRect, myTokenRect))
 		tokenFlag = true;
 	currentBarrySituation = BARRY_GO_FAST;
 }
@@ -1440,9 +1438,10 @@ void updateLaser()
 {
 	if (laserCounter == 0)
 	{
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 4; i++)
 		{
 			currentLaserY = rand() % 6;
+
 			playerLaser[i].y = laserY[currentLaserY];
 			playerLaser[i].existance = rand() % 2;
 		}
@@ -1450,6 +1449,7 @@ void updateLaser()
 	}
 	else
 	{
+		laserMainFlag = true;
 		if (laserCounter % 100 < 50)
 		{
 			currentLaserState = LASER_NONACTIVE;
@@ -1465,6 +1465,11 @@ void updateLaser()
 			currentLaserState = LASER_ACTIVE2;
 			laserCounter++;
 		}
+		else {
+			laserCounter = 0;
+			for (int i = 0; i < 6; i++)
+				playerLaser[i].existance = 0;
+		}
 	}
 }
 
@@ -1477,23 +1482,23 @@ void drawLaser(LaserState currentLaserState)
 		{
 			playerLaser[i].rect = { 30 , playerLaser[i].y , 740 , 50 };
 			if (playerLaser[i].existance = 1)
-				SBDL::showTexture(playerLaser[i].nonactive, myLazerRect);
+				SBDL::showTexture(playerLaser[i].nonactive, playerLaser[i].rect);
 		}
 		break;
 	case LASER_ACTIVE1:
 		for (int i = 0; i < 5; i++)
 		{
-			myLazerRect = { 30 , playerLaser[i].y , 740 , 50 };
+			playerLaser[i].rect = { 30 , playerLaser[i].y , 740 , 50 };
 			if (playerLaser[i].existance = 1)
-				SBDL::showTexture(playerLaser[i].active1, myLazerRect);
+				SBDL::showTexture(playerLaser[i].active1, playerLaser[i].rect);
 		}
 		break;
 	case LASER_ACTIVE2:
 		for (int i = 0; i < 5; i++)
 		{
-			myLazerRect = { 30 , playerLaser[i].y , 740 , 50 };
+			playerLaser[i].rect = { 30 , playerLaser[i].y , 740 , 50 };
 			if (playerLaser[i].existance = 1)
-				SBDL::showTexture(playerLaser[i].active2, myLazerRect);
+				SBDL::showTexture(playerLaser[i].active2, playerLaser[i].rect);
 		}
 		break;
 	}
@@ -1505,14 +1510,14 @@ the lazerMainFlag is set to false, the laserCounter is reset,
 and a random event is triggered.*/
 void handleLaser()
 {
-	if (lazerMainFlag)
+	if (laserMainFlag)
 	{
 		updateLaser();
 		drawLaser(currentLaserState);
 	}
 	if (laserCounter == 99)
 	{
-		lazerMainFlag = false;
+		laserMainFlag = false;
 		laserCounter = 0;
 		triggerRandomEvent();
 	}
